@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-image_path = "Images/Image.jpg"  # Replace with the actual path to your image
+image_path = "Images/Image.jpg"
 image = cv2.imread(image_path)
 
 cv2.imshow("Original Image", image)
