@@ -1,21 +1,28 @@
-import cv2
+from huggingface_hub import hf_hub_download
+from ultralytics import YOLO
+from supervision import Detections
+from PIL import Image, ImageDraw
 import numpy as np
 
-img = cv2.imread('Images\Image.jpg')
+# download model
+model_path = hf_hub_download(repo_id="arnabdhar/YOLOv8-Face-Detection", filename="model.pt")
 
-hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+# load model
+model = YOLO(model_path)
 
-lower_red = np.array([0, 100, 100])
-upper_red = np.array([10, 255, 255])
+# inference
+image_path = "Images/portrait.JPG"
+image = Image.open(image_path)
+output = model(image)
+results = Detections.from_ultralytics(output[0])
 
-mask = cv2.inRange(hsv, lower_red, upper_red)
+# Draw bounding boxes on the image
+draw = ImageDraw.Draw(image)
+for detection in results.xyxy:
+    # Extract bounding box coordinates
+    x1, y1, x2, y2 = detection
+    # Draw bounding box rectangle
+    draw.rectangle([x1, y1, x2, y2], outline="red", width=2)
 
-lower_purple = np.array([130, 100, 100])
-upper_purple = np.array([179, 255, 255])
-
-hsv[mask > 0] = [130, 255, 255]
-purple_img = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
-
-cv2.imshow('Purple Image', purple_img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# Show image with bounding boxes
+image.show()
